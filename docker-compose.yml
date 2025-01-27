@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  app:
+    image: php:8.3-cli
+    container_name: doc_on_time_api
+    working_dir: /var/www/doc_on_time_api
+    volumes:
+      - .:/var/www/doc_on_time_api
+    environment:
+      - APP_ENV=dev
+    command: bash -c "composer install && php -S 0.0.0.0:8000 -t public"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+  db:
+    image: mysql:8.0
+    container_name: doc_on_time_api_db
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: doc_on_time_api
+      MYSQL_USER: user
+      MYSQL_PASSWORD: doc_on_time_api
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
