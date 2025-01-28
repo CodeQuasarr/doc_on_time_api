@@ -20,6 +20,7 @@
         "symfony/yaml": "7.2.*"
     },
     "require-dev": {
+        "doctrine/doctrine-fixtures-bundle": "^4.0",
         "friendsofphp/php-cs-fixer": "^3.68",
         "phpstan/extension-installer": "^1.4",
         "phpstan/phpstan": "^2.1",

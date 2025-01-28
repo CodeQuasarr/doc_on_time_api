@@ -40,6 +40,11 @@ docker-restart: docker-stop docker-start
 ##------------------------------------------------------##
 ##                      COMMANDE SYMFONY                ##
 ##------------------------------------------------------##
+
+init-db:
+	$(EXEC) $(CONSOLE) doctrine:database:create --if-not-exists
+#	$(EXEC) $(CONSOLE) doctrine:migrations:migrate --no-interaction
+#	$(EXEC) $(CONSOLE) doctrine:fixtures:load --no-interaction
 ## Création d'une migration
 create-migration:
 	$(EXEC) $(CONSOLE) make:migration
