@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\DoctorInfo;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
@@ -11,7 +12,9 @@ class AppFixtures extends Fixture
 {
 
 
-    public function __construct(private readonly UserPasswordHasherInterface $passwordHasher) {}
+    public function __construct(private readonly UserPasswordHasherInterface $passwordHasher)
+    {
+    }
 
     public function load(ObjectManager $manager): void
     {
@@ -32,9 +35,9 @@ class AppFixtures extends Fixture
         // Create a user with the ROLE_DOCTOR role
         $doctor = new User(
             'Gabriel',
-        'Robert',
-        'jacques.hardy@dupuis.fr',
-        ['ROLE_DOCTOR'],
+            'Robert',
+            'jacques.hardy@dupuis.fr',
+            ['ROLE_DOCTOR'],
             '0331579444'
         );
         $doctor->setPassword($this->passwordHasher->hashPassword($doctor, 'password'));
@@ -42,6 +45,12 @@ class AppFixtures extends Fixture
         $doctor->setZipCode(35618);
         $doctor->setCity('Lopes-sur-Lelievre');
         $manager->persist($doctor);
+
+        $doctorInfo = new DoctorInfo();
+        $doctorInfo->setDoctor($doctor);
+        $doctorInfo->setLocation('CHU de Lopes-sur-Lelievre');
+        $doctorInfo->setSpeciality('Cardiologue');
+        $manager->persist($doctorInfo);
 
         $manager->flush();
     }

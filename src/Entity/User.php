@@ -75,8 +75,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         ?int $zip_code = null,
         ?string $city = null
     ) {
-        $this->first_name = $first_name;
-        $this->last_name = $last_name;
+        $this->first_name = ucfirst($first_name);
+        $this->last_name = strtoupper($last_name);
         $this->email = $email;
         $this->roles = $roles;
         $this->phone = $phone;
