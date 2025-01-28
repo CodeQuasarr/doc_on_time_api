@@ -54,6 +54,34 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private ?\DateTimeImmutable $updated_at = null;
 
+    #[ORM\Column(length: 50)]
+    private ?string $first_name = null;
+
+    #[ORM\Column(length: 50)]
+    private ?string $last_name = null;
+
+    public function __construct(
+        string $first_name,
+        string $last_name,
+        string $email,
+        array $roles = ['ROLE_PATIENT'],
+        ?string $phone = null,
+        ?string $address = null,
+        ?string $additional_address = null,
+        ?int $zip_code = null,
+        ?string $city = null
+    ) {
+        $this->first_name = $first_name;
+        $this->last_name = $last_name;
+        $this->email = $email;
+        $this->roles = $roles;
+        $this->phone = $phone;
+        $this->address = $address;
+        $this->additional_address = $additional_address;
+        $this->zip_code = $zip_code;
+        $this->city = $city;
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -210,5 +238,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setUpdatedAt(): void
     {
         $this->updated_at = new \DateTimeImmutable();
+    }
+
+    public function getFirstName(): ?string
+    {
+        return $this->first_name;
+    }
+
+    public function setFirstName(string $first_name): static
+    {
+        $this->first_name = ucfirst($first_name);
+
+        return $this;
+    }
+
+    public function getLastName(): ?string
+    {
+        return $this->last_name;
+    }
+
+    public function setLastName(string $last_name): static
+    {
+        $this->last_name = strtoupper($last_name);
+
+        return $this;
     }
 }

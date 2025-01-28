@@ -51,7 +51,9 @@ create-migration:
 ## Migration de la base de données
 migrate:
 	$(EXEC) $(CONSOLE) doctrine:migrations:migrate --no-interaction
-
+## Percistence des données
+fixtures:
+	$(EXEC) $(CONSOLE) doctrine:fixtures:load
 
 ##------------------------------------------------------##
 ##                      AUTRES                          ##
