@@ -3,9 +3,11 @@
 namespace App\Entity;
 
 use App\Repository\AppointmentRepository;
+use DateTimeImmutable;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: AppointmentRepository::class)]
 #[HasLifecycleCallbacks]
@@ -14,37 +16,44 @@ class Appointment
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Appointment:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'appointments')]
     private ?user $doctor = null;
 
     #[ORM\ManyToOne(inversedBy: 'appointments')]
+    #[\Symfony\Component\Serializer\Annotation\Groups(['Appointment:read'])]
     private ?user $patient = null;
 
     #[ORM\Column(length: 11)]
+    #[Groups(['Appointment:read'])]
     private ?string $date = null;
 
     #[ORM\Column(length: 6)]
+    #[Groups(['Appointment:read'])]
     private ?string $hour = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['Appointment:read'])]
     private ?string $status = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['Appointment:read'])]
     private ?string $type = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['Appointment:read'])]
     private ?string $reason = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $notes = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?DateTimeImmutable $created_at = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $updated_at = null;
+    private ?DateTimeImmutable $updated_at = null;
 
     public function __construct(
         user $doctor,
@@ -168,7 +177,7 @@ class Appointment
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->created_at;
     }
@@ -176,11 +185,11 @@ class Appointment
     #[ORM\PrePersist]
     public function setCreatedAt(): void
     {
-        $this->created_at = new \DateTimeImmutable();
+        $this->created_at = new DateTimeImmutable();
         $this->setUpdatedAt();
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?DateTimeImmutable
     {
         return $this->updated_at;
     }
@@ -188,6 +197,6 @@ class Appointment
     #[ORM\PreUpdate]
     public function setUpdatedAt(): void
     {
-        $this->updated_at = new \DateTimeImmutable();
+        $this->updated_at = new DateTimeImmutable();
     }
 }

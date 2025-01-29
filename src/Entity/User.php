@@ -38,6 +38,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 20, nullable: true)]
+    #[Groups(['Appointment:read'])]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -59,11 +60,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $updated_at = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['User:after_login'])]
+    #[Groups(['User:after_login', 'Appointment:read'])]
     private ?string $first_name = null;
 
     #[ORM\Column(length: 50)]
-    #[Groups(['User:after_login'])]
+    #[Groups(['User:after_login', 'Appointment:read'])]
     private ?string $last_name = null;
 
     /**

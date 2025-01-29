@@ -25,14 +25,14 @@ readonly class AppointmentDTO
 
         #[Assert\NotBlank(message: "The status field is required.")]
         #[Assert\Choice(
-            choices: ['pending', 'approved', 'rejected'],
+            choices: ['En attente', 'Programmée'],
             message: "The status must be one of the following: {{ choices }}"
         )]
         public ?string $status = null,
 
         #[Assert\NotBlank(message: "The type field is required.")]
         #[Assert\Choice(
-            choices: ['consultation', 'examination'],
+            choices: ['Consultation', 'Examination'],
             message: "The type must be one of the following: {{ choices }}"
         )]
         public ?string $type = null,

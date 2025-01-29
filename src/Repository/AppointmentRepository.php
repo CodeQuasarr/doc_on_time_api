@@ -3,7 +3,9 @@
 namespace App\Repository;
 
 use App\Entity\Appointment;
+use App\Entity\Availability;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -14,6 +16,29 @@ class AppointmentRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Appointment::class);
+    }
+
+
+
+    public function save(Availability $availability): void
+    {
+        $entityManager = $this->getEntityManager();
+        $entityManager->persist($availability);
+        $entityManager->flush();
+    }
+
+    public function findAppointmentByUserWithPagination($userId, $page, $limit): Paginator
+    {
+        $queryBuilder = $this->createQueryBuilder('a')
+            ->where('a.doctor = :userId')
+            ->orWhere('a.patient = :userId')
+            ->setParameter('userId', $userId)
+            ->orderBy('a.date', 'ASC')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $query = $queryBuilder->getQuery()->setHint(Paginator::HINT_ENABLE_DISTINCT, true);
+        return new Paginator($query);
     }
 
     //    /**
