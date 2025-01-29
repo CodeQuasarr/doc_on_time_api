@@ -16,6 +16,13 @@ class AvailabilityRepository extends ServiceEntityRepository
         parent::__construct($registry, Availability::class);
     }
 
+    public function save(Availability $availability): void
+    {
+        $entityManager = $this->getEntityManager();
+        $entityManager->persist($availability);
+        $entityManager->flush();
+    }
+
     //    /**
     //     * @return Availability[] Returns an array of Availability objects
     //     */
