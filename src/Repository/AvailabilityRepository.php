@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Availability;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -21,6 +22,20 @@ class AvailabilityRepository extends ServiceEntityRepository
         $entityManager = $this->getEntityManager();
         $entityManager->persist($availability);
         $entityManager->flush();
+    }
+
+    public function findAvailabilitiesByDoctorWithPagination($doctorInfo, int $page, int $limit): Paginator
+    {
+
+        $queryBuilder = $this->createQueryBuilder('a')
+            ->where('a.doctor_info = :doctorInfo')
+            ->setParameter('doctorInfo', $doctorInfo)
+            ->orderBy('a.date', 'ASC')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $query = $queryBuilder->getQuery()->setHint(Paginator::HINT_ENABLE_DISTINCT, true);
+        return new Paginator($query);
     }
 
     //    /**

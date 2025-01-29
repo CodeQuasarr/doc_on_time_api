@@ -25,10 +25,14 @@ final class AvailabilityController extends AbstractController
      * @throws \Exception
      */
     #[Route('/api/availabilities', name: 'app_availability', methods: ['GET'])]
-    public function getDoctorAvailabilities(): JsonResponse
+    public function getDoctorAvailabilities(Request $request): JsonResponse
     {
         $user = $this->getUser();
-        $response = $this->availabilityService->getAllAvailabilities($user);
+
+        $page = $request->query->getInt('page', 1);
+        $pageSize = $request->query->getInt('pageSize', 3);
+
+        $response = $this->availabilityService->getAllAvailabilities($user, $page, $pageSize);
         return $this->json($response, 200, [], ['groups' => 'Availability:read']);
     }
 

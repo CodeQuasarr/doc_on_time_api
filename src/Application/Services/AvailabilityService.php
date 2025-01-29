@@ -16,13 +16,12 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
-class AvailabilityService
+readonly class AvailabilityService
 {
 
     public function __construct(
-        private readonly AvailabilityRepository $availabilityRepository,
-        private readonly DoctorInfoRepository $doctorInfoRepository,
-        private readonly SerializerInterface $serializer,
+        private AvailabilityRepository $availabilityRepository,
+        private DoctorInfoRepository   $doctorInfoRepository,
     )
     { }
 
@@ -30,7 +29,21 @@ class AvailabilityService
     /**
      * @throws \Exception
      */
-    public function getAllAvailabilities(UserInterface $user): array
+//    public function getAllAvailabilities(UserInterface $user): array
+//    {
+//        try {
+//            $doctorInfo = $this->doctorInfoRepository->findOneBy(['doctor' => $user->getId()]);
+//
+//            if (is_null($doctorInfo)) {
+//                throw new HttpException(Response::HTTP_NOT_FOUND, 'Doctor not found');
+//            }
+//            return $doctorInfo->getAvailabilities()->toArray();
+//        } catch (\Exception $e) {
+//            throw new \Exception($e->getMessage());
+//        }
+//    }
+
+    public function getAllAvailabilities(UserInterface $user, int $page = 1, int $pageSize = 3): array
     {
         try {
             $doctorInfo = $this->doctorInfoRepository->findOneBy(['doctor' => $user->getId()]);
@@ -38,7 +51,21 @@ class AvailabilityService
             if (is_null($doctorInfo)) {
                 throw new HttpException(Response::HTTP_NOT_FOUND, 'Doctor not found');
             }
-            return $doctorInfo->getAvailabilities()->toArray();
+            $paginator = $this->availabilityRepository->findAvailabilitiesByDoctorWithPagination($doctorInfo->getId(), $page, $pageSize);
+
+            $availabilities = [];
+            foreach ($paginator as $availability) {
+                $availabilities[] = $availability;
+            }
+
+            return [
+                'data' => $availabilities,
+                'total' => count($paginator), // Nombre total d'éléments
+                'page' => $page,
+                'maxPage' => ceil(count($paginator) / $pageSize),
+                'pageSize' => $pageSize,
+            ];
+
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
