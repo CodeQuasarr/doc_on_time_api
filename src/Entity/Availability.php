@@ -3,40 +3,75 @@
 namespace App\Entity;
 
 use App\Repository\AvailabilityRepository;
+use DateTime;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
+use Symfony\Component\Serializer\Attribute\Ignore;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: AvailabilityRepository::class)]
+#[HasLifecycleCallbacks]
 class Availability
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['Availability:read'])]
     private ?int $id = null;
 
-    #[ORM\Column(type: Types::DATE_MUTABLE)]
-    private ?\DateTimeInterface $date = null;
+    #[ORM\ManyToOne(inversedBy: 'availabilities')]
+    #[ORM\JoinColumn(nullable: false)]
+    #[Ignore]
+    private ?doctorInfo $doctor_info = null;
 
-    #[ORM\Column(type: Types::ARRAY)]
-    private array $slots = [];
+    #[ORM\Column(type: Types::STRING, length: 11)]
+    #[Groups(['Availability:read'])]
+    private ?string $date = null;
+
+    #[ORM\Column(type: Types::JSON)]
+    #[Groups(['Availability:read', 'Availability:write'])]
+    private ?array $slots = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $created_at = null;
+    private ?DateTimeImmutable $created_at = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $updated_at = null;
+    private ?DateTimeImmutable $updated_at = null;
+
+    public function __construct(doctorInfo $doctor_info, string $date, array $slots)
+    {
+        $this->doctor_info = $doctor_info;
+        $this->date = $date;
+        $this->slots = $slots;
+    }
 
     public function getId(): ?int
     {
         return $this->id;
     }
 
-    public function getDate(): ?\DateTimeInterface
+    public function getDoctorInfo(): ?doctorInfo
     {
+        return $this->doctor_info;
+    }
+
+    public function setDoctorInfo(?doctorInfo $doctor_info): static
+    {
+        $this->doctor_info = $doctor_info;
+
+        return $this;
+    }
+
+    public function getDate(): ?string
+    {
+//        DateTime::createFromFormat('Y-m-d', $date);
         return $this->date;
     }
 
-    public function setDate(\DateTimeInterface $date): static
+    public function setDate(string $date): static
     {
         $this->date = $date;
 
@@ -55,27 +90,26 @@ class Availability
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->created_at;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $created_at): static
+    #[ORM\PrePersist]
+    public function setCreatedAt(): void
     {
-        $this->created_at = $created_at;
-
-        return $this;
+        $this->created_at = new \DateTimeImmutable();
+        $this->setUpdatedAt();
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?DateTimeImmutable
     {
         return $this->updated_at;
     }
 
-    public function setUpdatedAt(\DateTimeImmutable $updated_at): static
+    #[ORM\PreUpdate]
+    public function setUpdatedAt(): void
     {
-        $this->updated_at = $updated_at;
-
-        return $this;
+        $this->updated_at = new \DateTimeImmutable();
     }
 }
