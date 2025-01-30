@@ -4,9 +4,9 @@
 ##------------------------------------------------------##
 ## Variable pour la console Symfony
 CONSOLE=php bin/console
-## Variable pour docker-compose
+## Variable pour docker compose
 FIG=docker compose
-# Dans la ligne de commande de notre machine, on vérifie si docker-compose est disponible
+# Dans la ligne de commande de notre machine, on vérifie si docker compose est disponible
 HAS_DOCKER:=$(shell command -v $(FIG) 2> /dev/null)
 # Si c'est le cas, EXEC et EXEC_DB vont permettre d'exécuter des commandes dans les conteneurs
 ifdef HAS_DOCKER
@@ -29,10 +29,10 @@ install:
 ##                      COMMANDE DOCKER                 ##
 ##------------------------------------------------------##
 docker-start:
-	docker-compose up -d
+	docker compose up -d
 
 docker-stop:
-	docker-compose down
+	docker compose down
 
 docker-restart: docker-stop docker-start
 
