@@ -9,7 +9,7 @@ services:
       - .:/var/www/doc_on_time_api
     environment:
       - APP_ENV=dev
-    command: bash -c "composer install && php -S 0.0.0.0:8000 -t public"
+    command: bash -c "git config --global --add safe.directory /var/www/doc_on_time_api && composer install && php -S 0.0.0.0:8000 -t public"
     ports:
       - "8000:8000"
     depends_on:
