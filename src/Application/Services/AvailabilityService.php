@@ -18,7 +18,7 @@ class AvailabilityService extends BaseServices
 
     public function __construct(
         DoctorInfoRepository $doctorInfoRepository,
-        AvailabilityRepository $availabilityRepository,
+        private AvailabilityRepository $availabilityRepository,
     )
     {
         parent::__construct($doctorInfoRepository);
@@ -141,16 +141,5 @@ class AvailabilityService extends BaseServices
             $currentDate->modify('+1 day');
         }
         return array_values($groupedAvailabilities);
-    }
-
-    private function getValidDoctorInfo(UserInterface $user): DoctorInfo
-    {
-        $doctorInfo = $this->doctorInfoRepository->findOneBy(['doctor' => $user->getId()]);
-
-        if (!$doctorInfo) {
-            throw new HttpException(Response::HTTP_NOT_FOUND, self::ERROR_DOCTOR_NOT_FOUND);
-        }
-
-        return $doctorInfo;
     }
 }
