@@ -61,10 +61,10 @@ class AvailabilityRepository extends ServiceEntityRepository
     /**
      * @throws \DateMalformedStringException
      */
-    public function findAvailabilitiesDatesAndSlotsForWeek($doctorId) {
+    public function findAvailabilitiesDatesAndSlotsForWeek($doctorId, $currentDate) {
         // Convertir la date fournie en DateTime pour manipuler les jours de la semaine
         // Convertir la date actuelle en DateTime pour manipuler les jours de la semaine
-        $currentDate = new \DateTime('now', new \DateTimeZone('Europe/Paris'));
+        $currentDate = new \DateTime($currentDate, new \DateTimeZone('Europe/Paris'));
 
 
         // Trouver le lundi de la semaine actuelle

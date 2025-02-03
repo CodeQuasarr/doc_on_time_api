@@ -28,4 +28,13 @@ final class UserController extends AbstractController
 
         return $this->json($users, 200, [], ['groups' => ['User:after_login']]);
     }
+
+    #[Route('/api/users/patients', name: 'app_user_patient', methods: ['GET'])]
+    public function getPatients(): JsonResponse
+    {
+        $roles = $this->getUser()->getRoles();
+        $patients = $this->userService->getPatients($roles);
+
+        return $this->json($patients, 200, [], ['groups' => ['User:after_login']]);
+    }
 }

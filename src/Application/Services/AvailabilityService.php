@@ -12,15 +12,17 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-readonly class AvailabilityService
+class AvailabilityService extends BaseServices
 {
-    private const ERROR_DOCTOR_NOT_FOUND = 'Doctor not found';
     private const ERROR_AVAILABILITY_NOT_FOUND = 'Availability not found';
 
     public function __construct(
-        private AvailabilityRepository $availabilityRepository,
-        private DoctorInfoRepository $doctorInfoRepository,
-    ) {}
+        DoctorInfoRepository $doctorInfoRepository,
+        AvailabilityRepository $availabilityRepository,
+    )
+    {
+        parent::__construct($doctorInfoRepository);
+    }
 
     public function getAllAvailabilities(UserInterface $user, int $page = 1, int $pageSize = 3): array
     {
@@ -111,14 +113,14 @@ readonly class AvailabilityService
     /**
      * @throws \DateMalformedStringException
      */
-    public function getAvailabilitiesDatesAndHoursForWeek(UserInterface $user): array
+    public function getAvailabilitiesDatesAndHoursForWeek(UserInterface $user, $currentDate): array
     {
         $doctorInfo = $this->getValidDoctorInfo($user);
-        $availabilities = $this->availabilityRepository->findAvailabilitiesDatesAndSlotsForWeek($doctorInfo->getId());
+        $availabilities = $this->availabilityRepository->findAvailabilitiesDatesAndSlotsForWeek($doctorInfo->getId(), $currentDate);
         // Regrouper par date
         $groupedAvailabilities = [];
         // Générer les jours manquants pour la semaine
-        $currentDate = (new \DateTime('now', new \DateTimeZone('Europe/Paris')))->modify('monday this week');
+        $currentDate = (new \DateTime($currentDate, new \DateTimeZone('Europe/Paris')))->modify('monday this week');
         $cpt = 0;
         for ($i = 0; $i < 6; $i++) {
             $date = $currentDate->format('Y-m-d');

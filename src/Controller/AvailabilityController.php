@@ -75,7 +75,8 @@ final class AvailabilityController extends AbstractController
     public function getWeeklyAppointmentsHoursAndDates(Request $request): JsonResponse
     {
         $user = $this->getUser();
-        $response = $this->availabilityService->getAvailabilitiesDatesAndHoursForWeek($user);
+        $currentDate = $request->query->get('date') ?? date('Y-m-d');
+        $response = $this->availabilityService->getAvailabilitiesDatesAndHoursForWeek($user, $currentDate);
         return $this->json($response, 200, [], ['groups' => 'Availability:read']);
     }
 }

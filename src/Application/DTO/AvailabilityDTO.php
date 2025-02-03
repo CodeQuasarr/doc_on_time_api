@@ -15,7 +15,7 @@ readonly class AvailabilityDTO
         #[Assert\Type(type: 'string', message: "The day must be a valid date.")]
         public ?string     $date = null,
 
-        #[Assert\NotBlank(message: "The slots field is required.")]
+        #[Assert\NotNull(message: "The slots field is required.")]
         #[Assert\Type(type: 'array', message: "The slots must be a valid array.")]
         public ?array      $slots = []
     )
