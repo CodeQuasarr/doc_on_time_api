@@ -27,7 +27,15 @@ readonly class AppointmentService
 
 
     /**
-     * @throws \Exception
+     * Retrieves a paginated list of appointments for a given user.
+     * Allows filtering by an optional date and returns pagination details.
+     *
+     * @param UserInterface $user The user for whom the appointments are being fetched.
+     * @param int $page The current page of the paginated results (default is 1).
+     * @param int $pageSize The number of appointments per page (default is 3).
+     * @param string|null $date An optional date to filter the appointments.
+     * @return array An array containing appointment data, pagination metadata, and the total count of appointments.
+     * @throws \Exception When an error occurs while fetching or processing appointments.
      */
     public function getAppointments(UserInterface $user, int $page = 1, int $pageSize = 3, string $date = null): array
     {
@@ -52,6 +60,15 @@ readonly class AppointmentService
         }
     }
 
+    /**
+     * Retrieves appointment hours for a specific day for the given user.
+     * Returns a list of time slots corresponding to the appointments on the specified date.
+     *
+     * @param UserInterface $user The user for whom the appointment hours are being fetched.
+     * @param string $date The date for which the appointment hours are being retrieved, formatted as a string.
+     * @return array A list of appointment hours for the specified date.
+     * @throws \Exception When an error occurs during the fetching or processing of appointment hours.
+     */
     public function getTodayAppointHours(UserInterface $user, string $date): array
     {
         try {
@@ -63,6 +80,14 @@ readonly class AppointmentService
         }
     }
 
+    /**
+     * Retrieves appointments' dates and hours for a full week for the given user.
+     * Groups appointments by date, associating each date with a list of time slots.
+     *
+     * @param UserInterface $user The user for whom the appointments are being fetched.
+     * @return array A list of grouped appointments with their respective dates and time slots.
+     * @throws \Exception When an error occurs during the fetching or processing of appointments.
+     */
     public function getAppointmentsDatesAndHoursForWeek(UserInterface $user): array
     {
         try {
@@ -88,47 +113,4 @@ readonly class AppointmentService
             throw new \Exception($e->getMessage());
         }
     }
-
-
-
-
-//    public function createAvailability(AvailabilityDTO $availabilityDTO, UserInterface $user): Availability
-//    {
-//        try {
-//            $doctorInfo = $this->doctorInfoRepository->findOneBy(['doctor' => $user->getId()]);
-//
-//            if (is_null($doctorInfo)) {
-//                throw new HttpException(Response::HTTP_NOT_FOUND, 'Doctor not found');
-//            }
-//
-//            $availability = new Availability(
-//                $doctorInfo,
-//                $availabilityDTO->date,
-//                $availabilityDTO->slots
-//            );
-//            $this->availabilityRepository->save($availability);
-//            return $availability;
-//        } catch (\Exception $e) {
-//            throw new \Exception($e->getMessage());
-//        }
-//    }
-//
-//    public function updateAvailability(AvailabilityDTO $availabilityDTO, int $id): Availability
-//    {
-//        try {
-//            $availability = $this->availabilityRepository->find($id);
-//            if (is_null($availability)) {
-//                throw new HttpException(Response::HTTP_NOT_FOUND, 'Availability not found');
-//            }
-//            $availability->setDate($availabilityDTO->date);
-//            $availability->setSlots($availabilityDTO->slots);
-//            $this->availabilityRepository->save($availability);
-//            return $availability;
-//        } catch (\Exception $e) {
-//            throw new \Exception($e->getMessage());
-//        }
-//    }
-
-
-
 }

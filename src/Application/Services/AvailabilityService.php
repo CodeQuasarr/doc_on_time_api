@@ -24,6 +24,20 @@ class AvailabilityService extends BaseServices
         parent::__construct($doctorInfoRepository);
     }
 
+    /**
+     * Retrieves paginated availabilities for a doctor based on the given user.
+     *
+     * @param UserInterface $user The user for which the doctor's availabilities are fetched.
+     * @param int $page The current page number for pagination, defaults to 1.
+     * @param int $pageSize The number of items per page for pagination, defaults to 3.
+     *
+     * @return array Returns an array containing the following keys:
+     *               - 'data': The list of availabilities.
+     *               - 'total': The total count of availabilities.
+     *               - 'page': The current page number.
+     *               - 'maxPage': The maximum number of pages.
+     *               - 'pageSize': The size of each page.
+     */
     public function getAllAvailabilities(UserInterface $user, int $page = 1, int $pageSize = 3): array
     {
         $doctorInfo = $this->getValidDoctorInfo($user);
@@ -40,6 +54,19 @@ class AvailabilityService extends BaseServices
         ];
     }
 
+    /**
+     * Retrieves the next two days of availabilities for a doctor based on the given user.
+     *
+     * This function calculates the next two days, retrieves the doctor's availability
+     * data for those days, and formats it into a structured array. If no availabilities are
+     * found for a specific day, it returns an object with empty slots for that day.
+     *
+     * @param UserInterface $user The user for which the doctor's next two days of availabilities are fetched.
+     *
+     * @return array Returns an array of formatted availabilities, each containing:
+     *               - 'date': The availability date in 'Y-m-d' format.
+     *               - 'slots': The list of available slots or an empty array if no slots are available for that date.
+     */
     public function getDoctorNextTwoDaysAvailabilities(UserInterface $user): array
     {
         $doctorInfo = $this->getValidDoctorInfo($user);
@@ -79,6 +106,14 @@ class AvailabilityService extends BaseServices
         return array_values($flatAvailability);
     }
 
+    /**
+     * Creates a new availability entry for a doctor based on the given data and user.
+     *
+     * @param AvailabilityDTO $availabilityDTO DTO containing the date and slots for the availability.
+     * @param UserInterface $user The user associated with the doctor for whom the availability is being created.
+     *
+     * @return Availability Returns the newly created availability instance.
+     */
     public function createAvailability(AvailabilityDTO $availabilityDTO, UserInterface $user): Availability
     {
         $doctorInfo = $this->getValidDoctorInfo($user);
@@ -94,6 +129,16 @@ class AvailabilityService extends BaseServices
         return $availability;
     }
 
+    /**
+     * Updates the availability record with the provided data.
+     *
+     * @param AvailabilityDTO $availabilityDTO Data Transfer Object containing availability details.
+     * @param int $id Identifier of the availability to be updated.
+     *
+     * @return Availability Updated availability entity.
+     *
+     * @throws HttpException If the availability is not found.
+     */
     public function updateAvailability(AvailabilityDTO $availabilityDTO, int $id): Availability
     {
         $availability = $this->availabilityRepository->find($id);
@@ -111,6 +156,12 @@ class AvailabilityService extends BaseServices
     }
 
     /**
+     * Retrieves the availability dates and slots for the current week for a given user.
+     *
+     * @param UserInterface $user The user for whom the availabilities are fetched.
+     * @param mixed $currentDate The reference date to calculate the week's availabilities.
+     *
+     * @return array An array of availability data grouped by date for the week.
      * @throws \DateMalformedStringException
      */
     public function getAvailabilitiesDatesAndHoursForWeek(UserInterface $user, $currentDate): array

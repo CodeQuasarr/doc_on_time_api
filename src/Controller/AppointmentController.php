@@ -47,7 +47,6 @@ final class AppointmentController extends AbstractController
         return $this->json($response, 200, [], ['groups' => 'Appointment:read']);
     }
 
-
     /**
      * @throws Exception
      */

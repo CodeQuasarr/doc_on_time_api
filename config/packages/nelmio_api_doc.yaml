@@ -1,9 +1,293 @@
+# config\packages\nelmio_api_doc.yaml
+
 nelmio_api_doc:
-    documentation:
-        info:
-            title: My App
-            description: This is an awesome app!
-            version: 1.0.0
-    areas: # to filter documented areas
-        path_patterns:
-            - ^/api(?!/doc$) # Accepts routes under /api except /api/doc
+  documentation:
+    info:
+      title: DOC ON TIME
+      description: Une api de gestion de rendez-vous médicaux
+      version: 1.0.0
+    paths:
+      /api/login_check:
+        post:
+          operationId: postCredentialsItem
+          tags:
+            - Auth
+          summary: Permet d'obtenir le token JWT pour se logger.
+          requestBody:
+            description: Crée un nouveau token JWT
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Credentials'
+          responses:
+            '200':
+              description: Récupère le token JWT
+              content:
+                application/json:
+                  schema:
+                    $ref: '#/components/schemas/Token'
+
+      /api/me:
+        get:
+          operationId: getMe
+          tags:
+            - Auth
+          summary: Récupérer les informations de l'utilisateur connecté
+          description: >
+            Cette route permet de récupérer les informations de l'utilisateur connecté.
+          responses:
+            '200':
+              description: Informations de l'utilisateur connecté.
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      first_name:
+                        type: string
+                      last_name:
+                        type: string
+                      roles:
+                        type: array
+                        items:
+                          type: string
+
+      /api/appointments:
+        get:
+          operationId: getAppointmentsList
+          tags:
+            - Appointment
+          summary: Récupérer les rendez-vous de l'utilisateur avec pagination pour le role ROLE_PATIENT
+          description: >
+            Cette route permet de lister les rendez-vous d'un utilisateur connecté
+            avec une pagination et un filtre par date.
+          parameters:
+            - name: date
+              in: query
+              description: Date spécifique pour filtrer les rendez-vous au format YYYY-MM-DD
+              required: false
+              schema:
+                type: string
+                format: date
+            - name: page
+              in: query
+              description: Numéro de la page a afficher (1 par défaut)
+              required: false
+              schema:
+                type: integer
+                example: 1
+            - name: pageSize
+              in: query
+              description:
+                Nombre d'éléments par page (3 par défaut )
+              required: false
+              schema:
+                type: integer
+                example: 3
+          responses:
+            '200':
+              description: Liste paginée des rendez-vous de l'utilisateur.
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Appointment' # Modèle de l'entité Appointment
+
+      /api/appointments/hours:
+        get:
+          operationId: getAvailableHours
+          tags:
+            - Appointment
+          summary: Récupérer les heures des rendez-vous disponibles pour un docteur
+          description: >
+            Cette route permet de lister les heures de rendez-vous disponibles pour un docteur
+            avec une pagination.
+          parameters:
+            - name: date
+              in: query
+              description: Date spécifique pour filtrer les heures de rendez-vous au format YYYY-MM-DD
+              required: true
+              schema:
+                type: string
+                format: date
+          responses:
+            '200':
+              description: Liste des heures de rendez-vous disponibles pour le docteur.
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      type: string
+                      format: time
+
+      /api/appointments/week:
+        get:
+          operationId: getWeeklyAppointmentsHoursAndDates
+          tags:
+            - Appointment
+          summary: Récupérer les rendez-vous de la semaine een cours pour un docteur
+          description: >
+            Cette route permet de lister les rendez-vous de la semaine (date et heure) pour un docteur.
+          responses:
+            '200':
+              description: Liste des rendez-vous de la semaine pour le docteur.
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Appointment' # Modèle de l'entité Appointment
+
+      /api/availabilities:
+        post:
+          operationId: createDoctorAvailability
+          tags:
+            - Availability
+          summary: Créer des disponibilités pour un docteur
+          description: >
+            Cette route permet de créer des disponibilités pour un docteur.
+          requestBody:
+            description: Crée des disponibilités pour un docteur
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    slots:
+                      type: array
+                      items:
+                        type: string
+                        format: time
+                        default: [ "08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00" ]
+          responses:
+            '201':
+              description: Disponibilités créées avec succès.
+
+      /api/next-two-days-availabilities:
+        get:
+          operationId: getNextTwoDaysAvailabilities
+          tags:
+            - Availability
+          summary: Récupérer les disponibilités des docteurs pour les deux prochains jours
+          description: >
+            Cette route permet de lister les disponibilités des docteurs pour les deux prochains jours.
+          responses:
+            '200':
+              description: Liste des disponibilités des docteurs pour les deux prochains jours.
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        date:
+                          type: string
+                          format: date
+                        slots:
+                          type: array
+                          items:
+                            type: string
+                            format: time
+
+      /api/availabilities/{id}:
+        put:
+          operationId: updateDoctorAvailability
+          tags:
+            - Availability
+          summary: Mettre à jour des disponibilités pour un docteur
+          description: >
+            Cette route permet de mettre à jour des disponibilités pour un docteur.
+          parameters:
+            - name: id
+              in: path
+              description: ID de la disponibilité à mettre à jour
+              required: true
+              schema:
+                type: integer
+          requestBody:
+            description: Mettre à jour des disponibilités pour un docteur
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      format: date
+                    slots:
+                      type: array
+                      items:
+                        type: string
+                        format: time
+                        default: [ "08:00", "09:00", "10:00", "11:00", "14:00", "15:00", "16:00", "17:00", "18:00" ]
+          responses:
+            '200':
+              description: Disponibilités mises à jour avec succès.
+
+      /api/availabilities/week:
+        get:
+          operationId: getWeeklyAvailabilities
+          tags:
+            - Availability
+          summary: Récupérer les disponibilités de la semaine pour un docteur
+          description: >
+            Cette route permet de lister les disponibilités de la semaine (date et heures) pour un docteur.
+          responses:
+            '200':
+              description: Liste des disponibilités de la semaine pour le docteur.
+              content:
+                application/json:
+                  schema:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        date:
+                          type: string
+                          format: date
+                        slots:
+                          type: array
+                          items:
+                            type: string
+                            format: time
+
+
+    components:
+      schemas:
+        Token:
+          type: object
+          properties:
+            token:
+              type: string
+              readOnly: true
+        Credentials:
+          type: object
+          properties:
+            username:
+              type: string
+              default: admin@bookapi.com
+            password:
+              type: string
+              default: password
+      securitySchemes:
+        bearerAuth:
+          type: apiKey
+          in: header
+          name: Authorization # or another header name
+    security:
+      - bearerAuth: [ ]
+  areas: # to filter documented areas
+    path_patterns:
+      - ^/api(?!/doc$) # Accepts routes under /api except /api/doc

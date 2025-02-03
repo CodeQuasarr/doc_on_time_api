@@ -8,6 +8,9 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Core\User\UserInterface;
 
+/**
+ * Abstract base class for handling common service operations.
+ */
 abstract class BaseServices
 {
     protected const ERROR_DOCTOR_NOT_FOUND = 'Doctor not found';

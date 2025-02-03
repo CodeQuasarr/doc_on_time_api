@@ -35,17 +35,17 @@ final class AvailabilityController extends AbstractController
     /**
      * @throws \Exception
      */
-    #[Route('/api/availabilities', name: 'app_availability', methods: ['GET'])]
-    public function getDoctorAvailabilities(Request $request): JsonResponse
-    {
-        $user = $this->getUser();
-
-        $page = $request->query->getInt('page', 1);
-        $pageSize = $request->query->getInt('pageSize', 3);
-
-        $response = $this->availabilityService->getAllAvailabilities($user, $page, $pageSize);
-        return $this->json($response, 200, [], ['groups' => 'Availability:read']);
-    }
+//    #[Route('/api/availabilities', name: 'app_availability', methods: ['GET'])]
+//    public function getDoctorAvailabilities(Request $request): JsonResponse
+//    {
+//        $user = $this->getUser();
+//
+//        $page = $request->query->getInt('page', 1);
+//        $pageSize = $request->query->getInt('pageSize', 3);
+//
+//        $response = $this->availabilityService->getAllAvailabilities($user, $page, $pageSize);
+//        return $this->json($response, 200, [], ['groups' => 'Availability:read']);
+//    }
 
     /**
      * @throws \Exception
@@ -72,7 +72,7 @@ final class AvailabilityController extends AbstractController
      * @throws \Exception
      */
     #[Route('/api/availabilities/week', name: 'app_Availability_week', methods: ['GET'])]
-    public function getWeeklyAppointmentsHoursAndDates(Request $request): JsonResponse
+    public function getWeeklyAvailabilities(Request $request): JsonResponse
     {
         $user = $this->getUser();
         $currentDate = $request->query->get('date') ?? date('Y-m-d');
