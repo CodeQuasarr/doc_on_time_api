@@ -25,7 +25,7 @@ class Availability
     #[ORM\ManyToOne(inversedBy: 'availabilities')]
     #[ORM\JoinColumn(nullable: false)]
     #[Ignore]
-    private ?doctorInfo $doctor_info = null;
+    private ?DoctorInfo $doctor_info = null;
 
     #[ORM\Column(type: Types::STRING, length: 11)]
     #[Groups(['Availability:read'])]
@@ -53,12 +53,12 @@ class Availability
         return $this->id;
     }
 
-    public function getDoctorInfo(): ?doctorInfo
+    public function getDoctorInfo(): ?DoctorInfo
     {
         return $this->doctor_info;
     }
 
-    public function setDoctorInfo(?doctorInfo $doctor_info): static
+    public function setDoctorInfo(?DoctorInfo $doctor_info): static
     {
         $this->doctor_info = $doctor_info;
 
