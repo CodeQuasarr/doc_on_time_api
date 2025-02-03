@@ -4,3 +4,9 @@ controllers:
 
 api_login_check:
     path: /api/login_check
+
+redirect_home:
+    path: /
+    controller: Symfony\Component\HttpFoundation\RedirectResponse
+    defaults:
+        url: '/api/doc'
