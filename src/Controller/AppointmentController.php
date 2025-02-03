@@ -26,13 +26,39 @@ final class AppointmentController extends AbstractController
     public function getUserAppointments(Request $request): JsonResponse
     {
         $user = $this->getUser();
-
+        $date = $request->query->get('date');
         $page = $request->query->getInt('page', 1);
         $pageSize = $request->query->getInt('pageSize', 3);
 
-        $response = $this->appointmentService->getAppointments($user, $page, $pageSize);
+        $response = $this->appointmentService->getAppointments($user, $page, $pageSize, $date);
         return $this->json($response, 200, [], ['groups' => 'Appointment:read']);
     }
+
+    /**
+     * @throws Exception
+     */
+    #[Route('/api/appointments/hours', name: 'app_appointment_hours', methods: ['GET'])]
+    public function getTodayAppointHours(Request $request): JsonResponse
+    {
+        $user = $this->getUser();
+        $date = $request->query->get('date');
+
+        $response = $this->appointmentService->getTodayAppointHours($user, $date);
+        return $this->json($response, 200, [], ['groups' => 'Appointment:read']);
+    }
+
+
+    /**
+     * @throws Exception
+     */
+    #[Route('/api/appointments/week', name: 'app_appointment_week', methods: ['GET'])]
+    public function getWeeklyAppointmentsHoursAndDates(Request $request): JsonResponse
+    {
+        $user = $this->getUser();
+        $response = $this->appointmentService->getAppointmentsDatesAndHoursForWeek($user);
+        return $this->json($response, 200, [], ['groups' => 'Appointment:read']);
+    }
+
 
 //    /**
 //     * @throws \Exception

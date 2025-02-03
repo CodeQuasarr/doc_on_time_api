@@ -29,10 +29,10 @@ readonly class AppointmentService
     /**
      * @throws \Exception
      */
-    public function getAppointments(UserInterface $user, int $page = 1, int $pageSize = 3): array
+    public function getAppointments(UserInterface $user, int $page = 1, int $pageSize = 3, string $date = null): array
     {
         try {
-            $paginator = $this->appointmentRepository->findAppointmentByUserWithPagination($user->getId(), $page, $pageSize);
+            $paginator = $this->appointmentRepository->findAppointmentByUserWithPagination($user->getId(), $page, $pageSize, $date);
 
             $appointments = [];
             foreach ($paginator as $availability) {
@@ -41,7 +41,7 @@ readonly class AppointmentService
 
             return [
                 'data' => $appointments,
-                'total' => count($paginator), // Nombre total d'éléments
+                'total' => count($paginator),
                 'page' => $page,
                 'maxPage' => ceil(count($paginator) / $pageSize),
                 'pageSize' => $pageSize,
@@ -51,6 +51,46 @@ readonly class AppointmentService
             throw new \Exception($e->getMessage());
         }
     }
+
+    public function getTodayAppointHours(UserInterface $user, string $date): array
+    {
+        try {
+            return array_map(function($item) {
+                return $item['hour'];
+            }, $this->appointmentRepository->findTodayAppointHours($user->getId(), $date));
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+    public function getAppointmentsDatesAndHoursForWeek(UserInterface $user): array
+    {
+        try {
+            $appointments = $this->appointmentRepository->findAppointmentsDatesAndHoursForWeek($user->getId());
+            $groupedAppointments = [];
+            foreach ($appointments as $appointment) {
+                $date = $appointment['date'];
+                $hour = $appointment['hour'];
+
+                // Si la date est déjà présente dans le tableau, on ajoute l'heure
+                if (isset($groupedAppointments[$date])) {
+                    $groupedAppointments[$date]['slots'][] = $hour;
+                } else {
+                    // Sinon, on initialise la date avec son heure
+                    $groupedAppointments[$date] = [
+                        'date' => $date,
+                        'slots' => [$hour],
+                    ];
+                }
+            }
+            return array_values($groupedAppointments);
+        } catch (\Exception $e) {
+            throw new \Exception($e->getMessage());
+        }
+    }
+
+
+
 
 //    public function createAvailability(AvailabilityDTO $availabilityDTO, UserInterface $user): Availability
 //    {

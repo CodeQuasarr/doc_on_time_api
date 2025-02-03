@@ -4,110 +4,151 @@ namespace App\Application\Services;
 
 use App\Application\DTO\AvailabilityDTO;
 use App\Entity\Availability;
-use App\Entity\User;
+use App\Entity\DoctorInfo;
 use App\Repository\AvailabilityRepository;
 use App\Repository\DoctorInfoRepository;
-use App\Repository\UserRepository;
-use Doctrine\Common\Collections\Collection;
-use Symfony\Component\HttpFoundation\JsonResponse;
+use DateTime;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 readonly class AvailabilityService
 {
+    private const ERROR_DOCTOR_NOT_FOUND = 'Doctor not found';
+    private const ERROR_AVAILABILITY_NOT_FOUND = 'Availability not found';
 
     public function __construct(
         private AvailabilityRepository $availabilityRepository,
-        private DoctorInfoRepository   $doctorInfoRepository,
-    )
-    { }
-
-
-    /**
-     * @throws \Exception
-     */
-//    public function getAllAvailabilities(UserInterface $user): array
-//    {
-//        try {
-//            $doctorInfo = $this->doctorInfoRepository->findOneBy(['doctor' => $user->getId()]);
-//
-//            if (is_null($doctorInfo)) {
-//                throw new HttpException(Response::HTTP_NOT_FOUND, 'Doctor not found');
-//            }
-//            return $doctorInfo->getAvailabilities()->toArray();
-//        } catch (\Exception $e) {
-//            throw new \Exception($e->getMessage());
-//        }
-//    }
+        private DoctorInfoRepository $doctorInfoRepository,
+    ) {}
 
     public function getAllAvailabilities(UserInterface $user, int $page = 1, int $pageSize = 3): array
     {
-        try {
-            $doctorInfo = $this->doctorInfoRepository->findOneBy(['doctor' => $user->getId()]);
+        $doctorInfo = $this->getValidDoctorInfo($user);
+        $paginator = $this->availabilityRepository->findAvailabilitiesByDoctorWithPagination($doctorInfo->getId(), $page, $pageSize);
 
-            if (is_null($doctorInfo)) {
-                throw new HttpException(Response::HTTP_NOT_FOUND, 'Doctor not found');
+        $availabilities = iterator_to_array($paginator);
+
+        return [
+            'data' => $availabilities,
+            'total' => count($paginator),
+            'page' => $page,
+            'maxPage' => ceil(count($paginator) / $pageSize),
+            'pageSize' => $pageSize,
+        ];
+    }
+
+    public function getDoctorNextTwoDaysAvailabilities(UserInterface $user): array
+    {
+        $doctorInfo = $this->getValidDoctorInfo($user);
+        $availabilities = $this->availabilityRepository->findNextTwoDaysAvailabilityByDoctor($doctorInfo->getId());
+
+        $dates = [
+            (new DateTime('today'))->format('Y-m-d'),
+            (new DateTime('+1 day'))->format('Y-m-d'),
+        ];
+
+        $availabilityMapping = array_map(
+            fn($date) => [
+                'date' => $date,
+                'slots' => array_values(array_map(fn($a) => [
+                    'id' => $a->getId(),
+                    'date' => $a->getDate(),
+                    'slots' => $a->getSlots(),
+                ], array_filter($availabilities, fn($a) => $a->getDate() === $date))),
+            ],
+            $dates
+        );
+
+        // Aplatir la structure pour fusionner toutes les dates et supprimer les dates vides
+        $flatAvailability = [];
+        foreach ($availabilityMapping as $availability) {
+            if (count($availability['slots']) > 0) {
+                $flatAvailability[] = $availability['slots'][0]; // Ajouter directement l'élément si des créneaux existent
+            } else {
+                // Ajouter un objet avec des slots vides pour les dates sans disponibilité
+                $flatAvailability[] = [
+                    'date' => $availability['date'],
+                    'slots' => [],
+                ];
             }
-            $paginator = $this->availabilityRepository->findAvailabilitiesByDoctorWithPagination($doctorInfo->getId(), $page, $pageSize);
-
-            $availabilities = [];
-            foreach ($paginator as $availability) {
-                $availabilities[] = $availability;
-            }
-
-            return [
-                'data' => $availabilities,
-                'total' => count($paginator), // Nombre total d'éléments
-                'page' => $page,
-                'maxPage' => ceil(count($paginator) / $pageSize),
-                'pageSize' => $pageSize,
-            ];
-
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
         }
+
+        return array_values($flatAvailability);
     }
 
     public function createAvailability(AvailabilityDTO $availabilityDTO, UserInterface $user): Availability
     {
-        try {
-            $doctorInfo = $this->doctorInfoRepository->findOneBy(['doctor' => $user->getId()]);
+        $doctorInfo = $this->getValidDoctorInfo($user);
 
-            if (is_null($doctorInfo)) {
-                throw new HttpException(Response::HTTP_NOT_FOUND, 'Doctor not found');
-            }
+        $availability = new Availability(
+            $doctorInfo,
+            $availabilityDTO->date,
+            $availabilityDTO->slots
+        );
 
-            $availability = new Availability(
-                $doctorInfo,
-                $availabilityDTO->date,
-                $availabilityDTO->slots
-            );
-            $this->availabilityRepository->save($availability);
-            return $availability;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
-        }
+        $this->availabilityRepository->save($availability);
+
+        return $availability;
     }
 
     public function updateAvailability(AvailabilityDTO $availabilityDTO, int $id): Availability
     {
-        try {
-            $availability = $this->availabilityRepository->find($id);
-            if (is_null($availability)) {
-                throw new HttpException(Response::HTTP_NOT_FOUND, 'Availability not found');
-            }
-            $availability->setDate($availabilityDTO->date);
-            $availability->setSlots($availabilityDTO->slots);
-            $this->availabilityRepository->save($availability);
-            return $availability;
-        } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+        $availability = $this->availabilityRepository->find($id);
+
+        if (!$availability) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, self::ERROR_AVAILABILITY_NOT_FOUND);
         }
+
+        $availability->setDate($availabilityDTO->date);
+        $availability->setSlots($availabilityDTO->slots);
+
+        $this->availabilityRepository->save($availability);
+
+        return $availability;
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
+    public function getAvailabilitiesDatesAndHoursForWeek(UserInterface $user): array
+    {
+        $doctorInfo = $this->getValidDoctorInfo($user);
+        $availabilities = $this->availabilityRepository->findAvailabilitiesDatesAndSlotsForWeek($doctorInfo->getId());
+        // Regrouper par date
+        $groupedAvailabilities = [];
+        // Générer les jours manquants pour la semaine
+        $currentDate = (new \DateTime('now', new \DateTimeZone('Europe/Paris')))->modify('monday this week');
+        $cpt = 0;
+        for ($i = 0; $i < 6; $i++) {
+            $date = $currentDate->format('Y-m-d');
+            $dates = array_column($availabilities, 'date');
+            if (!in_array($date, $dates)) {
+                $groupedAvailabilities[] = [
+                    'date' => $date,
+                    'slots' => [],
+                ];
+            } else {
+                $groupedAvailabilities[] = [
+                    'date' => $date,
+                    'id' => $availabilities[$cpt]['id'],
+                    'slots' => $availabilities[$cpt]['slots'],
+                ];
+                $cpt++;
+            }
+            $currentDate->modify('+1 day');
+        }
+        return array_values($groupedAvailabilities);
+    }
 
+    private function getValidDoctorInfo(UserInterface $user): DoctorInfo
+    {
+        $doctorInfo = $this->doctorInfoRepository->findOneBy(['doctor' => $user->getId()]);
 
+        if (!$doctorInfo) {
+            throw new HttpException(Response::HTTP_NOT_FOUND, self::ERROR_DOCTOR_NOT_FOUND);
+        }
+
+        return $doctorInfo;
+    }
 }

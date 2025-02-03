@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Application\DTO\AvailabilityDTO;
 use App\Application\Services\AvailabilityService;
-use App\Entity\Availability;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,6 +19,18 @@ final class AvailabilityController extends AbstractController
         SerializerInterface $serializer
     )
     { }
+
+    /**
+     * @throws \Exception
+     */
+    #[Route('/api/next-two-days-availabilities', name: 'app_next_two_availability', methods: ['GET'])]
+    public function getNextTwoDaysAvailabilities(): JsonResponse
+    {
+        $user = $this->getUser();
+        $response = $this->availabilityService->getDoctorNextTwoDaysAvailabilities($user);
+
+        return $this->json($response, 200, [], ['groups' => 'Availability:read']);
+    }
 
     /**
      * @throws \Exception
@@ -40,10 +51,7 @@ final class AvailabilityController extends AbstractController
      * @throws \Exception
      */
     #[Route('/api/availabilities', name: 'app_availability_create', methods: ['POST'])]
-    public function createDoctorAvailability(
-        Request $request,
-        #[MapRequestPayload] AvailabilityDTO $availability
-    ): JsonResponse
+    public function createDoctorAvailability( Request $request,  #[MapRequestPayload] AvailabilityDTO $availability): JsonResponse
     {
         $user = $this->getUser();
         $response = $this->availabilityService->createAvailability($availability, $user);
@@ -54,12 +62,20 @@ final class AvailabilityController extends AbstractController
      * @throws \Exception
      */
     #[Route('/api/availabilities/{id}', name: 'app_availability_show', methods: ['PUT'])]
-    public function updateDoctorAvailability(
-        #[MapRequestPayload] AvailabilityDTO $availability, int $id
-    ): JsonResponse
+    public function updateDoctorAvailability(#[MapRequestPayload] AvailabilityDTO $availability, int $id): JsonResponse
     {
-
         $response = $this->availabilityService->updateAvailability($availability, $id);
+        return $this->json($response, 200, [], ['groups' => 'Availability:read']);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    #[Route('/api/availabilities/week', name: 'app_Availability_week', methods: ['GET'])]
+    public function getWeeklyAppointmentsHoursAndDates(Request $request): JsonResponse
+    {
+        $user = $this->getUser();
+        $response = $this->availabilityService->getAvailabilitiesDatesAndHoursForWeek($user);
         return $this->json($response, 200, [], ['groups' => 'Availability:read']);
     }
 }
