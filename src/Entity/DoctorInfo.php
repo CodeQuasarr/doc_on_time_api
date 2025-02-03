@@ -18,7 +18,7 @@ class DoctorInfo
     private ?int $id = null;
 
     #[ORM\OneToOne(cascade: ['persist', 'remove'])]
-    private ?user $doctor = null;
+    private ?User $doctor = null;
 
     #[ORM\Column(length: 255)]
     private ?string $location = null;
@@ -48,12 +48,12 @@ class DoctorInfo
         return $this->id;
     }
 
-    public function getDoctor(): ?user
+    public function getDoctor(): ?User
     {
         return $this->doctor;
     }
 
-    public function setDoctor(?user $doctor): static
+    public function setDoctor(?User $doctor): static
     {
         $this->doctor = $doctor;
 

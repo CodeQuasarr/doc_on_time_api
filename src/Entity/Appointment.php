@@ -20,11 +20,11 @@ class Appointment
     private ?int $id = null;
 
     #[ORM\ManyToOne(inversedBy: 'appointments')]
-    private ?user $doctor = null;
+    private ?User $doctor = null;
 
     #[ORM\ManyToOne(inversedBy: 'appointments')]
     #[\Symfony\Component\Serializer\Annotation\Groups(['Appointment:read'])]
-    private ?user $patient = null;
+    private ?User $patient = null;
 
     #[ORM\Column(length: 11)]
     #[Groups(['Appointment:read'])]
@@ -81,24 +81,24 @@ class Appointment
         return $this->id;
     }
 
-    public function getDoctor(): ?user
+    public function getDoctor(): ?User
     {
         return $this->doctor;
     }
 
-    public function setDoctor(?user $doctor): static
+    public function setDoctor(?User $doctor): static
     {
         $this->doctor = $doctor;
 
         return $this;
     }
 
-    public function getPatient(): ?user
+    public function getPatient(): ?User
     {
         return $this->patient;
     }
 
-    public function setPatient(?user $patient): static
+    public function setPatient(?User $patient): static
     {
         $this->patient = $patient;
 
