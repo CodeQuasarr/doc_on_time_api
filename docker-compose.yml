@@ -20,7 +20,7 @@ services:
       dockerfile: Dockerfile
 
   db:
-    image: mysql:8.0
+    image: mariadb:10.11
     container_name: doc_on_time_api_db
     environment:
       MYSQL_ROOT_PASSWORD: root
