@@ -3,9 +3,9 @@
 namespace App\Application\Services;
 
 use App\Entity\DoctorInfo;
-use App\Repository\DoctorInfoRepository;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Infrastructure\Persistence\DoctorInfoRepository;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 /**

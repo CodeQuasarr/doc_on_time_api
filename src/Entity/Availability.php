@@ -2,15 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\AvailabilityRepository;
-use DateTime;
+use App\Infrastructure\Persistence\AvailabilityRepository;
 use DateTimeImmutable;
-use DateTimeInterface;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
-use Symfony\Component\Serializer\Attribute\Ignore;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Serializer\Attribute\Ignore;
 
 #[ORM\Entity(repositoryClass: AvailabilityRepository::class)]
 #[HasLifecycleCallbacks]

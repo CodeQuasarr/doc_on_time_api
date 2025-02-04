@@ -4,9 +4,8 @@ namespace App\Application\Services;
 
 use App\Application\DTO\AvailabilityDTO;
 use App\Entity\Availability;
-use App\Entity\DoctorInfo;
-use App\Repository\AvailabilityRepository;
-use App\Repository\DoctorInfoRepository;
+use App\Infrastructure\Persistence\AvailabilityRepository;
+use App\Infrastructure\Persistence\DoctorInfoRepository;
 use DateTime;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -70,7 +69,7 @@ class AvailabilityService extends BaseServices
     public function getDoctorNextTwoDaysAvailabilities(UserInterface $user): array
     {
         $doctorInfo = $this->getValidDoctorInfo($user);
-        $availabilities = $this->availabilityRepository->findNextTwoDaysAvailabilityByDoctor($doctorInfo->getId());
+        $availabilities = $this->availabilityRepository->findDoctorAvailabilityForNextTwoDay($doctorInfo->getId());
 
         $dates = [
             (new DateTime('today'))->format('Y-m-d'),
@@ -167,7 +166,7 @@ class AvailabilityService extends BaseServices
     public function getAvailabilitiesDatesAndHoursForWeek(UserInterface $user, $currentDate): array
     {
         $doctorInfo = $this->getValidDoctorInfo($user);
-        $availabilities = $this->availabilityRepository->findAvailabilitiesDatesAndSlotsForWeek($doctorInfo->getId(), $currentDate);
+        $availabilities = $this->availabilityRepository->findDoctorWeeklyAvailabilitiesAndSlots($doctorInfo->getId(), $currentDate);
         // Regrouper par date
         $groupedAvailabilities = [];
         // Générer les jours manquants pour la semaine

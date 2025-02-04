@@ -2,26 +2,14 @@
 
 namespace App\Application\Services;
 
-use App\Application\DTO\AvailabilityDTO;
-use App\Entity\Availability;
-use App\Entity\User;
-use App\Repository\AppointmentRepository;
-use App\Repository\AvailabilityRepository;
-use App\Repository\DoctorInfoRepository;
-use App\Repository\UserRepository;
-use Doctrine\Common\Collections\Collection;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use App\Domain\Repository\AppointmentRepositoryInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Serializer\SerializerInterface;
-use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 readonly class AppointmentService
 {
 
     public function __construct(
-        private readonly AppointmentRepository $appointmentRepository,
+        private readonly AppointmentRepositoryInterface $appointmentRepository,
     )
     { }
 
@@ -74,7 +62,7 @@ readonly class AppointmentService
         try {
             return array_map(function($item) {
                 return $item['hour'];
-            }, $this->appointmentRepository->findTodayAppointHours($user->getId(), $date));
+            }, $this->appointmentRepository->findDoctorAppointmentHoursForToday($user->getId(), $date));
         } catch (\Exception $e) {
             throw new \Exception($e->getMessage());
         }
@@ -91,7 +79,7 @@ readonly class AppointmentService
     public function getAppointmentsDatesAndHoursForWeek(UserInterface $user): array
     {
         try {
-            $appointments = $this->appointmentRepository->findAppointmentsDatesAndHoursForWeek($user->getId());
+            $appointments = $this->appointmentRepository->findDoctorWeeklyAppointments($user->getId());
             $groupedAppointments = [];
             foreach ($appointments as $appointment) {
                 $date = $appointment['date'];

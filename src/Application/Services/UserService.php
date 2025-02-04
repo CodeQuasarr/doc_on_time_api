@@ -2,8 +2,8 @@
 
 namespace App\Application\Services;
 
-use App\Repository\DoctorInfoRepository;
-use App\Repository\UserRepository;
+use App\Infrastructure\Persistence\DoctorInfoRepository;
+use App\Infrastructure\Persistence\UserRepository;
 
 class UserService extends BaseServices
 {

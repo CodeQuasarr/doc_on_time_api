@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Repository;
+namespace App\Infrastructure\Persistence;
 
+use App\Domain\Repository\AppointmentRepositoryInterface;
 use App\Entity\Appointment;
 use App\Entity\Availability;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -11,14 +12,12 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<Appointment>
  */
-class AppointmentRepository extends ServiceEntityRepository
+class AppointmentRepository extends ServiceEntityRepository implements  AppointmentRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Appointment::class);
     }
-
-
 
     public function save(Availability $availability): void
     {
@@ -27,7 +26,7 @@ class AppointmentRepository extends ServiceEntityRepository
         $entityManager->flush();
     }
 
-    public function findAppointmentByUserWithPagination($userId, $page, $limit, $date): Paginator
+    public function findAppointmentByUserWithPagination(int $userId, $page, $limit, $date): Paginator
     {
         $queryBuilder = $this->createQueryBuilder('a')
             ->where('a.doctor = :userId')
@@ -43,7 +42,12 @@ class AppointmentRepository extends ServiceEntityRepository
         return new Paginator($query);
     }
 
-    public function findTodayAppointHours($doctorId, $date): array
+    public function findAllAppointments(): array
+    {
+        return $this->findAll();
+    }
+
+    public function findDoctorAppointmentHoursForToday(int $doctorId, string $date): array
     {
         $queryBuilder = $this->createQueryBuilder('a')
             ->select('a.hour')
@@ -58,9 +62,9 @@ class AppointmentRepository extends ServiceEntityRepository
     /**
      * @throws \DateMalformedStringException
      */
-    public function findAppointmentsDatesAndHoursForWeek($doctorId): array
+    public function findDoctorWeeklyAppointments(int $doctorId): array
     {
-        // Convertir la date fournie en DateTime pour manipuler les jours de la semaine
+        // Convertir la date d\'aujourd'hui en DateTime pour manipuler les jours de la semaine
         $currentDate = new \DateTime();
 
         // Trouver le lundi de la semaine actuelle
@@ -82,29 +86,4 @@ class AppointmentRepository extends ServiceEntityRepository
         ;
         return $queryBuilder->getQuery()->getResult();
     }
-
-    //    /**
-    //     * @return Appointment[] Returns an array of Appointment objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('a.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Appointment
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

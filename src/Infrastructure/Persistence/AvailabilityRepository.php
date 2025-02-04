@@ -1,8 +1,12 @@
 <?php
 
-namespace App\Repository;
+namespace App\Infrastructure\Persistence;
 
+use App\Domain\Repository\AvailabilityRepositoryInterface;
 use App\Entity\Availability;
+use DateMalformedStringException;
+use DateTime;
+use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Doctrine\Persistence\ManagerRegistry;
@@ -10,7 +14,7 @@ use Doctrine\Persistence\ManagerRegistry;
 /**
  * @extends ServiceEntityRepository<Availability>
  */
-class AvailabilityRepository extends ServiceEntityRepository
+class AvailabilityRepository extends ServiceEntityRepository implements AvailabilityRepositoryInterface
 {
     public function __construct(ManagerRegistry $registry)
     {
@@ -24,9 +28,13 @@ class AvailabilityRepository extends ServiceEntityRepository
         $entityManager->flush();
     }
 
-    public function findAvailabilitiesByDoctorWithPagination($doctorInfo, int $page, int $limit): Paginator
+    public function findAllAvailabilities(): array
     {
+        return $this->findAll();
+    }
 
+    public function findAvailabilitiesByDoctorWithPagination(int $doctorInfo, int $page, int $limit): Paginator
+    {
         $queryBuilder = $this->createQueryBuilder('a')
             ->where('a.doctor_info = :doctorInfo')
             ->setParameter('doctorInfo', $doctorInfo)
@@ -38,19 +46,17 @@ class AvailabilityRepository extends ServiceEntityRepository
         return new Paginator($query);
     }
 
-    public function findNextTwoDaysAvailabilityByDoctor($doctorInfoId): array
+    public function findDoctorAvailabilityForNextTwoDay(int $doctorInfo): array
     {
-
-        // Conversion des dates en string au format 'Y-m-d'
-        $today = (new \DateTime('today'))->format('Y-m-d');
-        $afterTomorrow = (new \DateTime('+2 days'))->format('Y-m-d');
+        $today = (new DateTime('today'))->format('Y-m-d');
+        $afterTomorrow = (new DateTime('+2 days'))->format('Y-m-d');
 
 
         $queryBuilder = $this->createQueryBuilder('a')
             ->where('a.doctor_info = :doctorInfoId')
             ->andWhere('a.date >= :today')
             ->andWhere('a.date < :afterTomorrow')
-            ->setParameter('doctorInfoId', $doctorInfoId)
+            ->setParameter('doctorInfoId', $doctorInfo)
             ->setParameter('today', $today)
             ->setParameter('afterTomorrow', $afterTomorrow)
             ->orderBy('a.date', 'ASC');
@@ -59,16 +65,15 @@ class AvailabilityRepository extends ServiceEntityRepository
     }
 
     /**
-     * @throws \DateMalformedStringException
+     * @throws DateMalformedStringException
      */
-    public function findAvailabilitiesDatesAndSlotsForWeek($doctorId, $currentDate) {
-        // Convertir la date fournie en DateTime pour manipuler les jours de la semaine
-        // Convertir la date actuelle en DateTime pour manipuler les jours de la semaine
-        $currentDate = new \DateTime($currentDate, new \DateTimeZone('Europe/Paris'));
+    public function findDoctorWeeklyAvailabilitiesAndSlots(int $doctorInfo, string $currentDate): array
+    {
+        $date = new DateTime($currentDate, new DateTimeZone('Europe/Paris'));
 
 
         // Trouver le lundi de la semaine actuelle
-        $startOfWeek = (clone $currentDate)->modify('this week')->modify('monday');
+        $startOfWeek = (clone $date)->modify('this week')->modify('monday');
 
         // Trouver le samedi de la semaine actuelle
         $endOfWeek = (clone $startOfWeek)->modify('saturday');
@@ -77,34 +82,10 @@ class AvailabilityRepository extends ServiceEntityRepository
             ->where('a.doctor_info = :doctorInfoId')
             ->andWhere('a.date >= :startOfWeek')
             ->andWhere('a.date <= :endOfWeek')
-            ->setParameter('doctorInfoId', $doctorId)
+            ->setParameter('doctorInfoId', $doctorInfo)
             ->setParameter('startOfWeek', $startOfWeek->format('Y-m-d'))
             ->setParameter('endOfWeek', $endOfWeek->format('Y-m-d'))
             ->orderBy('a.date', 'ASC');
         return $queryBuilder->getQuery()->getResult();
     }
-    //    /**
-    //     * @return Availability[] Returns an array of Availability objects
-    //     */
-    //    public function findByExampleField($value): array
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->orderBy('a.id', 'ASC')
-    //            ->setMaxResults(10)
-    //            ->getQuery()
-    //            ->getResult()
-    //        ;
-    //    }
-
-    //    public function findOneBySomeField($value): ?Availability
-    //    {
-    //        return $this->createQueryBuilder('a')
-    //            ->andWhere('a.exampleField = :val')
-    //            ->setParameter('val', $value)
-    //            ->getQuery()
-    //            ->getOneOrNullResult()
-    //        ;
-    //    }
 }

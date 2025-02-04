@@ -10,7 +10,8 @@
         "files": [
             "./config/packages/doctrine.yaml",
             "./src/Entity/.gitignore",
-            "./src/Repository/.gitignore"
+            "./src/Infrastructure/Persistence/.gitignore",
+            "./src/Domaine/Repository/.gitignore"
         ]
     },
     "doctrine/doctrine-fixtures-bundle": {
