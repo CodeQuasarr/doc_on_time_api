@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controller;
+namespace App\Infrastructure\Controller;
 
 use App\Application\DTO\AvailabilityDTO;
 use App\Application\Services\AvailabilityService;

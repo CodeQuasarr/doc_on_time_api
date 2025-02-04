@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Controller;
+namespace App\Infrastructure\Controller;
 
 use App\Application\Services\UserService;
+use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
-use Nelmio\ApiDocBundle\Annotation\ApiDoc;
 
 final class UserController extends AbstractController
 {

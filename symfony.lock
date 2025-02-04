@@ -136,7 +136,7 @@
             "./config/routes/framework.yaml",
             "./config/services.yaml",
             "./public/index.php",
-            "./src/Controller/.gitignore",
+            "./src/infrastructure/Controller/.gitignore",
             "./src/Kernel.php"
         ]
     },
