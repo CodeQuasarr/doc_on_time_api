@@ -1,5 +1,7 @@
 services:
   app:
+    networks:
+      - app_network
     image: php:8.3-cli
     container_name: doc_on_time_api
     working_dir: /var/www/doc_on_time_api
@@ -20,7 +22,9 @@ services:
       dockerfile: Dockerfile
 
   db:
-    image: mariadb:10.11
+    networks:
+      - app_network
+    image: mysql
     container_name: doc_on_time_api_db
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -32,5 +36,8 @@ services:
     volumes:
       - db_data:/var/lib/mysql
 
+networks:
+    app_network:
+        driver: bridge
 volumes:
   db_data:
